@@ -1,0 +1,5 @@
+{
+  "name": "OSSAI Medical Summarizer",
+  "description": "A tool for Pfizer OSSAI to instantly summarize medical documents (PDF/Text) using OpenAI.",
+  "requestFramePermissions": []
+}
