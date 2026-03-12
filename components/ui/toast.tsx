@@ -4,6 +4,14 @@ import { motion, AnimatePresence } from 'motion/react';
 import { AlertCircle, Info, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+/**
+ * Properties for the Toast notification component.
+ * 
+ * @param message - The text content to display.
+ * @param isVisible - Controls whether the toast is currently shown.
+ * @param onClose - Callback function to close the toast.
+ * @param type - Stylistic variation ('error' or 'info').
+ */
 interface ToastProps {
   message: string;
   isVisible: boolean;
@@ -11,6 +19,10 @@ interface ToastProps {
   type?: 'error' | 'info';
 }
 
+/**
+ * A lightweight notification component for providing user feedback.
+ * Uses Framer Motion for smooth entry and exit animations.
+ */
 export function Toast({ message, isVisible, onClose, type = 'error' }: ToastProps) {
   const isError = type === 'error';
   

@@ -5,22 +5,40 @@ import { useDropzone, FileRejection } from 'react-dropzone';
 import { UploadCloud } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+/**
+ * Properties for the FileUpload component.
+ * 
+ * @param onFileSelect - Callback function triggered when a valid file is uploaded.
+ * @param isLoading - Indicates if the application is currently processing a file.
+ * @param onError - Optional callback to handle file rejection errors.
+ */
 interface FileUploadProps {
   onFileSelect: (file: File) => void;
   isLoading?: boolean;
   onError?: (error: string) => void;
 }
 
+/**
+ * A user-friendly file upload component with drag-and-drop support.
+ * Specifically configured for PDF and plain text documents.
+ */
 export function FileUpload({ onFileSelect, isLoading, onError }: FileUploadProps) {
+  /**
+   * Success handler for react-dropzone. Triggers only for valid, accepted files.
+   */
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0 && !isLoading) {
       onFileSelect(acceptedFiles[0]);
     }
   }, [onFileSelect, isLoading]);
 
+  /**
+   * Failure handler for react-dropzone. Categorizes errors for user feedback.
+   */
   const onDropRejected = useCallback((fileRejections: FileRejection[]) => {
     if (fileRejections.length > 0 && onError) {
       const { errors } = fileRejections[0];
+      // Categorize common errors for specific error messaging.
       if (errors[0]?.code === 'file-too-large') {
         onError('File is too large. Maximum size is 5MB.');
       } else if (errors[0]?.code === 'file-invalid-type') {
@@ -31,6 +49,7 @@ export function FileUpload({ onFileSelect, isLoading, onError }: FileUploadProps
     }
   }, [onError]);
 
+  // Configure react-dropzone for specific file types and single-file uploads.
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     onDropRejected,
@@ -38,7 +57,7 @@ export function FileUpload({ onFileSelect, isLoading, onError }: FileUploadProps
       'application/pdf': ['.pdf'],
       'text/plain': ['.txt'],
     },
-    maxSize: 5 * 1024 * 1024, // 5MB limit
+    maxSize: 5 * 1024 * 1024, // Consistent 5MB limit
     maxFiles: 1,
     disabled: isLoading,
   });

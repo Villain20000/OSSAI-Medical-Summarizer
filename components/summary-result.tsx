@@ -4,27 +4,47 @@ import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Copy, Download, Check, FileText } from 'lucide-react';
 
+/**
+ * Properties for the SummaryResult component.
+ * 
+ * @param summary - The Markdown-formatted summary text to display.
+ */
 interface SummaryResultProps {
   summary: string;
 }
 
+/**
+ * Displays the AI-generated summary with Markdown rendering and 
+ * provides utility actions like copy and export.
+ */
 export function SummaryResult({ summary }: SummaryResultProps) {
   const [copied, setCopied] = useState(false);
 
+  /**
+   * Copies the raw summary text to the user's clipboard.
+   */
   const handleCopy = async () => {
     await navigator.clipboard.writeText(summary);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
+  /**
+   * Exports the summary as a downloadable Markdown (.md) file.
+   */
   const handleExport = () => {
+    // Create a blob representing the summary content.
     const blob = new Blob([summary], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
+    
+    // Programmatically create and trigger a download link.
     const a = document.createElement('a');
     a.href = url;
     a.download = 'pfizer-document-summary.md';
     document.body.appendChild(a);
     a.click();
+    
+    // Clean up to prevent memory leaks.
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };

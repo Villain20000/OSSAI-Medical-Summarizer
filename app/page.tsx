@@ -9,23 +9,42 @@ import { extractTextFromDocument } from '@/services/document-service';
 import { Loader2, ArrowLeft, Activity, ShieldCheck, Zap, FileSearch, Copy, Check } from 'lucide-react';
 import { GoogleGenAI } from '@google/genai';
 
+/**
+ * The core application states for the Dashboard:
+ * - idle: Waiting for a file upload.
+ * - processing: Extracting text and generating a summary via AI.
+ * - result: Displaying the generated summary.
+ */
 type AppState = 'idle' | 'processing' | 'result';
 
+/**
+ * Main Dashboard component that handles document upload, text extraction,
+ * and summary generation using Google Gemini AI.
+ */
 export default function Dashboard() {
   const [appState, setAppState] = useState<AppState>('idle');
   const [summary, setSummary] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [copied, setCopied] = useState(false);
 
+  /**
+   * Orchestrates the document analysis process:
+   * 1. Extracts raw text from the file (server-side).
+   * 2. Sends the text to the Gemini API for structured summarization.
+   * 
+   * @param file - The user-selected document.
+   */
   const handleFileSelect = async (file: File) => {
     setAppState('processing');
     setError('');
     
+    // Prepare data for server-side text extraction.
     const formData = new FormData();
     formData.append('file', file);
 
     const extractResult = await extractTextFromDocument(formData);
 
+    // Stop if extraction failed or returned no text.
     if (!extractResult.success || !extractResult.text) {
       setError(extractResult.error || 'Failed to extract text from document.');
       setAppState('idle');
@@ -33,8 +52,10 @@ export default function Dashboard() {
     }
 
     try {
+      // Initialize Gemini AI with client-side API key.
       const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY });
       
+      // Construct a structured prompt for the LLM to ensure consistent summary output.
       const prompt = `
 Analyze the following document and provide a summary strictly in this Markdown format:
 
@@ -58,11 +79,13 @@ ${extractResult.text}
 """
       `;
 
+      // Use the gemini-3-flash-preview model for high speed and low latency.
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: prompt,
       });
 
+      // Update state if we got a valid response, otherwise handle as an error.
       if (response.text) {
         setSummary(response.text);
         setAppState('result');
@@ -76,6 +99,9 @@ ${extractResult.text}
     }
   };
 
+  /**
+   * Resets the dashboard state to allow analyzing another document.
+   */
   const handleReset = () => {
     setAppState('idle');
     setSummary('');
